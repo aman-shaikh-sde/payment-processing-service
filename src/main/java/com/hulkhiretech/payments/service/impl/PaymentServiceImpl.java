@@ -5,56 +5,54 @@ import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import com.hulkhiretech.payments.Entity.TransactionEntity;
-import com.hulkhiretech.payments.dao.TransactionDAO;
+import com.hulkhiretech.payments.dao.interfaces.TransactionDao;
+import com.hulkhiretech.payments.dto.TransactionDTO;
 import com.hulkhiretech.payments.pojo.CreateTxnRequest;
-import com.hulkhiretech.payments.service.PaymentService;
+import com.hulkhiretech.payments.pojo.CreateTxnResponse;
+import com.hulkhiretech.payments.service.impl.statushandler.CreatedStatusHandler;
+import com.hulkhiretech.payments.service.interfaces.PaymentService;
+import com.hulkhiretech.payments.service.interfaces.TransactionStatusHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class PaymentServiceImpl implements PaymentService{
+@RequiredArgsConstructor
+public class PaymentServiceImpl implements PaymentService {
 	
-	private final TransactionDAO transactionDAO;
+	private final TransactionDao transactionDao;
 	
-	private final ModelMapper mapper;
+	private final ModelMapper modelMapper;
 	
+	private final CreatedStatusHandler createdStatusHandler;
 
 	@Override
-	public String createPayment(CreateTxnRequest createTxnRequest) {
-		// TODO Auto-generated method stub
+	public CreateTxnResponse createPayment(CreateTxnRequest createTxnRequest) {
+		log.info("Received payment request | createTxnRequest: {}", createTxnRequest);
 		
+		String txnReference = UUID.randomUUID().toString();
+		int txnStatusId = 1;
+		log.info("Generated txnReference: {}, txnStatusId: {}", txnReference, txnStatusId);
 		
+		TransactionStatusHandler statusHandler = createdStatusHandler; // TODO
 		
+		TransactionDTO txnDTO = modelMapper.map(createTxnRequest, 
+				TransactionDTO.class);
+		log.info("Mapped CreateTxnRequest to txnDTO: {}", txnDTO);
 		
-		String txnRefrence=UUID.randomUUID().toString();
+		txnDTO.setTxnStatusId(txnStatusId);
+		txnDTO.setTxnReference(txnReference);
 		
-
-		log.info("UUID for txnRefrence: {}",txnRefrence);
-
-		TransactionEntity entity=mapper.map(createTxnRequest, TransactionEntity.class);
-			entity.setId(1);
-		entity.setTxnReference(txnRefrence);	
-		entity.setTxnStatusId(1);
-		log.info("txnStatusId: {}", entity.getTxnStatusId());
-
-		log.info("Transaction Entity: {}",entity);
-				
+		log.info("Passnig DTO to TransactionStatusHandler txnDTO: {}", txnDTO);
+		txnDTO = statusHandler.handleTransactionStatus(txnDTO);
 		
+		CreateTxnResponse response = new CreateTxnResponse();
+		response.setTxnReference(txnDTO.getTxnReference());
+		response.setTxnStatusId(txnDTO.getTxnStatusId());
+		log.info("Mapped txnDTO to CreateTxnResponse: {}", response);
 		
-		log.info("Request is Created from Service Impl: {}",createTxnRequest);
-		
-		boolean isCreated=transactionDAO.createTransaction(entity);
-		log.info("paymentMethodId = {}", entity.getPaymentMethodId());
-
-		
-		return "Transaction is Saved from service impl"+isCreated;
-		
+		return response;
 	}
-
 
 }

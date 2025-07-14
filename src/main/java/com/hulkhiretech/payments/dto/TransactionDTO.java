@@ -1,4 +1,4 @@
-package com.hulkhiretech.payments.entity;
+package com.hulkhiretech.payments.dto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import lombok.Data;
 
 @Data
-public class TransactionEntity {
+public class TransactionDTO {
 	
 	private int id;
     private int userId;
