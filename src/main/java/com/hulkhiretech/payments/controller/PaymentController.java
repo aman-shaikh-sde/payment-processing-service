@@ -1,15 +1,14 @@
 package com.hulkhiretech.payments.controller;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hulkhiretech.payments.dao.TransactionDAO;
 import com.hulkhiretech.payments.pojo.CreateTxnRequest;
-import com.hulkhiretech.payments.service.PaymentService;
+import com.hulkhiretech.payments.pojo.CreateTxnResponse;
+import com.hulkhiretech.payments.service.interfaces.PaymentService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,24 +18,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentController {
+	
+	private final PaymentService paymentService;
 
-	
-	private final PaymentService service;
-	
-	
 	@PostMapping
-	public String  creatPayment(@RequestBody CreateTxnRequest createTxnRequest) {
+	public CreateTxnResponse createPayment(@RequestBody CreateTxnRequest createTxnRequest) {
+		log.info("Received payment request| createTxnRequest:{}", 
+				createTxnRequest);
+		// This method would typically handle payment creation logic
 		
-		log.info("Tarnsaction Request: {}",createTxnRequest);
+		CreateTxnResponse response = paymentService.createPayment(createTxnRequest);
+		log.info("Payment service response: {}", response);
 		
-		log.info("Payment Created Succussfully");
-		return service.createPayment(createTxnRequest);
+		// CREATED
+		return response;
 	}
 	
-	@PostMapping("/{txnId}/initiate")
-	public String paymentInitiate(@PathVariable int txnId) {
-		log.info("Transaction Id: {}",txnId);
-		
-		return "Transaction Id:"+txnId;
+	@PostMapping("/{txnReference}/initiate")
+	public String initiatePayment(@PathVariable String txnReference) {
+		log.info("Initiating payment for transaction reference: {}", txnReference);
+		return "Payment initiated successfully|txnReference:" + txnReference;
 	}
 }
