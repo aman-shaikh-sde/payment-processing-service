@@ -5,13 +5,13 @@ import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.hulkhiretech.payments.constants.TransactionStatusEnum;
 import com.hulkhiretech.payments.dao.interfaces.TransactionDao;
 import com.hulkhiretech.payments.dto.TransactionDTO;
 import com.hulkhiretech.payments.pojo.CreateTxnRequest;
 import com.hulkhiretech.payments.pojo.CreateTxnResponse;
-import com.hulkhiretech.payments.service.impl.statushandler.CreatedStatusHandler;
+import com.hulkhiretech.payments.service.StatusService;
 import com.hulkhiretech.payments.service.interfaces.PaymentService;
-import com.hulkhiretech.payments.service.interfaces.TransactionStatusHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,17 +25,17 @@ public class PaymentServiceImpl implements PaymentService {
 	
 	private final ModelMapper modelMapper;
 	
-	private final CreatedStatusHandler createdStatusHandler;
+	private final StatusService statusService;
 
+	
 	@Override
 	public CreateTxnResponse createPayment(CreateTxnRequest createTxnRequest) {
 		log.info("Received payment request | createTxnRequest: {}", createTxnRequest);
 		
 		String txnReference = UUID.randomUUID().toString();
-		int txnStatusId = 1;
+		int txnStatusId = TransactionStatusEnum.CREATED.getId();
 		log.info("Generated txnReference: {}, txnStatusId: {}", txnReference, txnStatusId);
 		
-		TransactionStatusHandler statusHandler = createdStatusHandler; // TODO
 		
 		TransactionDTO txnDTO = modelMapper.map(createTxnRequest, 
 				TransactionDTO.class);
@@ -45,7 +45,8 @@ public class PaymentServiceImpl implements PaymentService {
 		txnDTO.setTxnReference(txnReference);
 		
 		log.info("Passnig DTO to TransactionStatusHandler txnDTO: {}", txnDTO);
-		txnDTO = statusHandler.handleTransactionStatus(txnDTO);
+		
+		txnDTO = statusService.updatePayment(txnDTO);
 		
 		CreateTxnResponse response = new CreateTxnResponse();
 		response.setTxnReference(txnDTO.getTxnReference());
@@ -54,5 +55,6 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		return response;
 	}
+
 
 }
