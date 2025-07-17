@@ -9,9 +9,9 @@ public class CreateTxnRequest {
 
     private int userId;
 
-    private int paymentMethodId;
-    private int providerId;
-    private int paymentTypeId;
+    private String paymentMethod;
+    private String provider;
+    private String paymentType;
     
     private BigDecimal amount;
     private String currency;
