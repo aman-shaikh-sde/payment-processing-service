@@ -11,35 +11,27 @@ import com.hulkhiretech.payments.service.interfaces.TransactionStatusHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Service
-@Slf4j
-@RequiredArgsConstructor
-public class CreatedStatusHandler implements TransactionStatusHandler {
 
-	private final TransactionDao transactionDao;
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class PendingStatusHandler implements TransactionStatusHandler{
+
+private final ModelMapper modelMapper;
 	
-	private final ModelMapper modelMapper;
+	private final TransactionDao transactionDao;
 	
 	@Override
 	public TransactionDTO handleTransactionStatus(TransactionDTO transactionDTO) {
 		log.info("Handling transaction status for DTO: {}", transactionDTO);
 		
-	
-
-		TransactionEntity entity = modelMapper.map(transactionDTO, TransactionEntity.class);
-
-		boolean isCreated = transactionDao.createTransaction(entity);
-		log.info("Transaction created: {}", isCreated);
 		
-		if (!isCreated) {
-			log.error("Failed to create transaction in database");
-			throw new RuntimeException("Transaction creation failed");
-		}
-		
-		log.info("Transaction successfully created in database, transactionDTO:{}",
+		transactionDao.updateTransaction(modelMapper.map(transactionDTO, TransactionEntity.class));
+		log.info("Transaction successfully Pending in database, transactionDTO:{}",
 				transactionDTO);
 		
 		return transactionDTO;
 	}
+	
 
 }

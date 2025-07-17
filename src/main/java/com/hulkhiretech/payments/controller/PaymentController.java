@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hulkhiretech.payments.pojo.CreateTxnRequest;
 import com.hulkhiretech.payments.pojo.CreateTxnResponse;
+import com.hulkhiretech.payments.pojo.InitiateTxnReq;
 import com.hulkhiretech.payments.service.interfaces.PaymentService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,13 @@ public class PaymentController {
 	}
 	
 	@PostMapping("/{txnReference}/initiate")
-	public String initiatePayment(@PathVariable String txnReference) {
+	public String initiatePayment(@PathVariable String txnReference,
+									@RequestBody InitiateTxnReq tx){
 		log.info("Initiating payment for transaction reference: {}", txnReference);
-		return "Payment initiated successfully|txnReference:" + txnReference;
+		
+		String response=paymentService.initiatePayment(txnReference, tx);
+		
+		return "Payment initiated successfully|txnReference:" + txnReference+"|txnStatusId:"
+				+ " Response"+response;
 	}
 }
